@@ -168,12 +168,15 @@ func (s *Signaler) HandleTurnServerCredentials(writer http.ResponseWriter, reque
 	*/
 	ttl := 86400
 	host := fmt.Sprintf("%s:%d", s.turn.Config.PublicIP, s.turn.Config.Port)
+	host6 := fmt.Sprintf("%s:%d", s.turn.Config.PublicIP6, s.turn.Config.Port)
+
 	credential := TurnCredentials{
 		Username: turnUsername,
 		Password: turnPassword,
 		TTL:      ttl,
 		Uris: []string{
 			"turn:" + host + "?transport=udp",
+			"turn:" + host6 + "?transport=udp",
 		},
 	}
 	s.expresMap.Set(turnUsername, credential, int64(ttl))

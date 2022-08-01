@@ -9,9 +9,10 @@ import (
 )
 
 type TurnServerConfig struct {
-	PublicIP string
-	Port     int
-	Realm    string
+	PublicIP  string
+	PublicIP6 string
+	Port      int
+	Realm     string
 }
 
 func DefaultConfig() TurnServerConfig {
@@ -50,12 +51,24 @@ func NewTurnServer(config TurnServerConfig) *TurnServer {
 	}
 	server.udpListener = udpListener
 
+	udpListener6, err := net.ListenPacket("udp6", "[::1]:"+strconv.Itoa(config.Port))
+	if err != nil {
+		logger.Panicf("Failed to create TURN server listener: %s", err)
+	}
+
 	turnServer, err := turn.NewServer(turn.ServerConfig{
 		Realm:       config.Realm,
 		AuthHandler: server.HandleAuthenticate,
 		PacketConnConfigs: []turn.PacketConnConfig{
 			{
 				PacketConn: udpListener,
+				RelayAddressGenerator: &turn.RelayAddressGeneratorStatic{
+					RelayAddress: net.ParseIP(config.PublicIP),
+					Address:      "0.0.0.0",
+				},
+			},
+			{
+				PacketConn: udpListener6,
 				RelayAddressGenerator: &turn.RelayAddressGeneratorStatic{
 					RelayAddress: net.ParseIP(config.PublicIP),
 					Address:      "0.0.0.0",

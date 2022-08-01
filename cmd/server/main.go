@@ -19,6 +19,7 @@ func main() {
 	}
 
 	publicIP := cfg.Section("turn").Key("public_ip").String()
+	publicIP6 := cfg.Section("turn").Key("public_i6").String()
 	stunPort, err := cfg.Section("turn").Key("port").Int()
 	if err != nil {
 		stunPort = 3478
@@ -27,6 +28,7 @@ func main() {
 
 	turnConfig := turn.DefaultConfig()
 	turnConfig.PublicIP = publicIP
+	turnConfig.PublicIP6 = publicIP6
 	turnConfig.Port = stunPort
 	turnConfig.Realm = realm
 	turn := turn.NewTurnServer(turnConfig)
